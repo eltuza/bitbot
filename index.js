@@ -3,7 +3,6 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const request = require('request')
-const auth = require('./auth');
 
 const app = express()
 
@@ -15,11 +14,11 @@ app.use(bodyParser.urlencoded({extended: false}))
 // Process application/json
 app.use(bodyParser.json())
 
-const token = auth.page_token;
+const APP_TOKEN = process.env.BITBOT_PAGE_TOKEN;
 
 // Index route
 app.get('/', function (req, res) {
-    res.send('Hello world, I am a chat bot ' + token)
+    res.send('Hello world, I am a chat bot')
 })
 
 // for Facebook verification
