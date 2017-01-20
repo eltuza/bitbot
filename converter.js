@@ -1,10 +1,11 @@
+'use strict'
 const request = require('request')
 
 const BITCOINVERTER_BASE_URL = 'https://apiv2.bitcoinaverage.com/convert/global?';
 const DEFAULT_FIAT_SYMBOL = 'USD';
 const BTC_SYMBOL = 'BTC';
 
-module.exports {
+module.exports = {
   evaluate: function(message) {
     var tokens = message.split(' ');
 
@@ -31,29 +32,26 @@ module.exports {
       } else if (tickers.length === 3) {
         tickFrom = BTC_SYMBOL;
         tickTo = tickers;
-      } else
+      } else {
+        return `Can't interpret ${tickers.join(' ')}`;
+      }
+      const target = `${BITCOINVERTER_BASE_URL}from=${tickFrom}&to=${tickTo}&amount=${amount}`;
+      console.log(target);
+    } else {
       return `Can't interpret ${tickers.join(' ')}`;
     }
 
-    const target = `${BITCOINVERTER_BASE_URL}from=${tickFrom}&to=${tickTo}&amount=${amount}`;
-    console.log(target);
-
-
-  } else {
-    return `Can't interpret ${tickers.join(' ')}`;
+    request({
+      url: target,
+      method: 'GET',
+    }, function(error, response, body) {
+      if (error) {
+        console.log('Error sending messages: ', error)
+      } else if (response.body.error) {
+        console.log('Error: ', response.body.error)
+      } else {
+        console.log(response.body);
+      }
+    })
   }
-
-  request({
-    url: target,
-    method: 'GET',
-  }, function(error, response, body) {
-    if (error) {
-      console.log('Error sending messages: ', error)
-    } else if (response.body.error) {
-      console.log('Error: ', response.body.error)
-    } else {
-      console.log(response.body);
-    }
-  })
-}
 }
