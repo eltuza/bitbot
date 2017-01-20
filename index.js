@@ -3,6 +3,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const request = require('request')
+const converter = require('./converter');
 
 const app = express()
 
@@ -18,20 +19,21 @@ const APP_TOKEN = process.env.BITBOT_PAGE_TOKEN;
 
 // Index route
 app.get('/', function (req, res) {
-    res.send('Hello world, I am a chat bot')
+  res.send('Yo dawg! I am BitBot')
 })
 
 // for Facebook verification
 app.post('/webhook/', function (req, res) {
-  console.log(req)
-  console.log(req.body);
   let messaging_events = req.body.entry[0].messaging
   for (let i = 0; i < messaging_events.length; i++) {
       let event = req.body.entry[0].messaging[i]
       let sender = event.sender.id
       if (event.message && event.message.text) {
-          let text = event.message.text
-          sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))
+
+        let message = event.message.text;
+        const result = converter.evaluate(message);
+
+        sendTextMessage(sender, result)
       }
   }
   res.sendStatus(200)
