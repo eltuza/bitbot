@@ -21,8 +21,8 @@ module.exports = {
       }
 
     } else if (tokens.length === 2) {
-      const amount = token[0];
-      const tickers = token[1];
+      const amount = tokens[0];
+      const tickers = tokens[1];
 
       let tickFrom, tickTo;
 
@@ -46,10 +46,13 @@ module.exports = {
       method: 'GET',
     }, function(error, response, body) {
       if (error) {
-        console.log('Error sending messages: ', error)
+        console.log('Error sending messages: ', error);
+        return `Can't send message to service. Try again later or report the issue.`;
       } else if (response.body.error) {
         console.log('Error: ', response.body.error)
+        return `Can't understand your input. Write <b>help</b> to see instructions.`;
       } else {
+        return 'Mh...something went wrong. Please report this issue.'
         console.log(response.body);
       }
     })
