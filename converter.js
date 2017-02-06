@@ -21,7 +21,7 @@ function isTicker(token) {
 
 function Conversion(fromTicker, toTicker, amount) {
   this.fromTicker = fromTicker;
-  this.toTicker = toTicker || fromTicker.toLowerCase() ? 'usd' : BTC_SYMBOL : DEFAULT_FIAT_SYMBOL;
+  this.toTicker = toTicker || fromTicker.toLowerCase() === 'usd' ? BTC_SYMBOL : DEFAULT_FIAT_SYMBOL;
   this.amount = amount || 1;
 }
 
