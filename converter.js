@@ -91,13 +91,17 @@ module.exports = {
         console.log('Error: ', response.body.error)
         sendText(`Can't understand your input. Write <b>help</b> to see instructions.`);
       } else {
-        if (!response.body.price) {
+        var resp = response.body;
+        if (typeof resp !== 'object') {
+          resp = JSON.parse(resp);
+        }
+
+        if (!resp.price) {
           sendText(`I can't interpret the result at the time. Sorry!`);
         } else {
-          sendText(`${conversion.amount} ${conversion.fromTicker} is ${response.body.price} ${conversion.toTicker}`);
+          sendText(`${conversion.amount} ${conversion.fromTicker} is ${resp.price} ${conversion.toTicker}`);
         }
-        console.log(response);
-        console.log(response.body);
+        console.log(resp);
       }
     })
   }
