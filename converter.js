@@ -42,11 +42,12 @@ module.exports = {
   evaluate: function(message, sendText) {
     var tokens = message.split(' ');
     let target;
+    var conversion;
     if (tokens.length === 1) {
       var token = tokens[0];
 
       // TODO: Create a hash of valid tokens to compare.
-      var conversion = processToken(token);
+      conversion = processToken(token);
       if (!conversion) {
         sendText(`Can't process your input: ${token}`);
         return;
@@ -57,7 +58,6 @@ module.exports = {
       const token1 = tokens[0];
       const token2 = tokens[1];
 
-      var conversion;
       if (isTicker(token1)) {
         conversion = new Conversion(
           token1,
@@ -91,7 +91,11 @@ module.exports = {
         console.log('Error: ', response.body.error)
         sendText(`Can't understand your input. Write <b>help</b> to see instructions.`);
       } else {
-        sendText(`Price is: ${response.body.price}`);
+        if (!response.body.price) {
+          sendText(`I can't interpret the result at the time. Sorry!`);
+        } else {
+          sendText(`${conversion.amount} ${conversion.fromTicker} is ${response.body.price} ${conversion.toTicker}`);
+        }
         console.log(response.body);
       }
     })
