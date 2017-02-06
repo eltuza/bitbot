@@ -93,7 +93,11 @@ module.exports = {
       } else {
         var resp = response.body;
         if (typeof resp !== 'object') {
-          resp = JSON.parse(resp);
+          try {
+            resp = JSON.parse(resp);
+          } catch () {
+            sendText(`I can't interpret the result at the time. Sorry!`);
+          }
         }
 
         if (!resp.price) {
