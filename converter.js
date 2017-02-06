@@ -95,7 +95,7 @@ module.exports = {
         if (typeof resp !== 'object') {
           try {
             resp = JSON.parse(resp);
-          } catch () {
+          } catch (e) {
             sendText(`I can't interpret the result at the time. Sorry!`);
           }
         }
