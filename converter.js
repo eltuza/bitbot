@@ -20,17 +20,17 @@ function isTicker(token) {
 }
 
 function Conversion(fromTicker, toTicker, amount) {
-  this.fromTicker = fromTicker;
-  this.toTicker = toTicker || fromTicker.toLowerCase() === 'usd' ? BTC_SYMBOL : DEFAULT_FIAT_SYMBOL;
+  this.fromTicker = fromTicker.toUpperCase();
+  this.toTicker = toTicker ? toTicker.toUpperCase() : fromTicker.toLowerCase() === 'usd' ? BTC_SYMBOL : DEFAULT_FIAT_SYMBOL;
   this.amount = amount || 1;
 }
 
 function processToken(token) {
   // TODO: Create a hash of valid tokens to compare.
   if (token.length === 3) {
-    return new Conversion(token.toUpperCase());
+    return new Conversion(token);
   } else if (token.length === 6) {
-    return new Conversion(token.slice(0, 3).toUpperCase(), token.slice(3).toUpperCase())
+    return new Conversion(token.slice(0, 3), token.slice(3))
   } else if (/^\d+$/.test(token)) {
     return new Conversion(BTC_SYMBOL, DEFAULT_FIAT_SYMBOL, token);
   } else {
@@ -61,7 +61,7 @@ module.exports = {
       if (isTicker(token1)) {
         conversion = new Conversion(
           token1,
-          isTicker(token2) ? token : undefined,
+          isTicker(token2) ? token2 : undefined,
           isTicker(token2) ? undefined : token2
         )
       } else if(/^\d+$/.test(token1)) {
