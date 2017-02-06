@@ -96,6 +96,7 @@ module.exports = {
         } else {
           sendText(`${conversion.amount} ${conversion.fromTicker} is ${response.body.price} ${conversion.toTicker}`);
         }
+        console.log(response);
         console.log(response.body);
       }
     })
