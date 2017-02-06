@@ -39,7 +39,7 @@ function processToken(token) {
 }
 
 module.exports = {
-  evaluate: function(message) {
+  evaluate: function(message, sendText) {
     var tokens = message.split(' ');
     let target;
     if (tokens.length === 1) {
@@ -48,20 +48,11 @@ module.exports = {
       // TODO: Create a hash of valid tokens to compare.
       var conversion = processToken(token);
       if (!conversion) {
-        return `Can't process your input: ${token}`;
+        sendText(`Can't process your input: ${token}`);
+        return;
       }
 
       target = `${BITCOINVERTER_BASE_URL}from=${conversion.fromTicker}&to=${conversion.toTicker}`;
-      // Check if symbol or number.
-      // if (isNaN(tokens[0])) {
-      //   // Ticker
-      //   const ticker = tokens[0];
-      //   target = `${BITCOINVERTER_BASE_URL}from=${BTC_SYMBOL}&to=${ticker}`;
-      // } else {
-      //   const amount = tokens[0];
-      //   target = `${BITCOINVERTER_BASE_URL}from=${BTC_SYMBOL}&to=${DEFAULT_FIAT_SYMBOL}&amount=${amount}`;
-      // }
-
     } else if (tokens.length === 2) {
       const token1 = tokens[0];
       const token2 = tokens[1];
@@ -78,13 +69,15 @@ module.exports = {
         conversion = processToken(token2);
         conversion.amount = token1;
       } else {
-        return `Can't interpret ${tokens.join(' ')}`;
+        sendText(`Can't interpret ${tokens.join(' ')}`);
+        return;
       }
 
       target = `${BITCOINVERTER_BASE_URL}from=${conversion.fromTicker}&to=${conversion.toTicker}&amount=${conversion.amount}`;
       console.log(target);
     } else {
-      return `Can't interpret ${tokens.join(' ')}`;
+      sendText(`Can't interpret ${tokens.join(' ')}`);
+      return;
     }
 
     request({
@@ -93,12 +86,12 @@ module.exports = {
     }, function(error, response, body) {
       if (error) {
         console.log('Error sending messages: ', error);
-        return `Can't send message to service. Try again later or report the issue.`;
+        sendText(`Can't send message to service. Try again later or report the issue.`);
       } else if (response.body.error) {
         console.log('Error: ', response.body.error)
-        return `Can't understand your input. Write <b>help</b> to see instructions.`;
+        sendText(`Can't understand your input. Write <b>help</b> to see instructions.`);
       } else {
-        return 'Mh...something went wrong. Please report this issue.'
+        sendText(`Price is: ${response.body.price}`);
         console.log(response.body);
       }
     })
