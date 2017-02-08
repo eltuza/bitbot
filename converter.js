@@ -13,6 +13,13 @@ const BTC_SYMBOL = 'BTC';
 // USD BTC
 // 2 BTC USD
 
+
+// Talk:
+// Sell / Buy
+// what Exchange?
+// Price right?
+// Add commission
+//
 function isTicker(token) {
   return typeof token === 'string' &&
     token.length === 3 &&
@@ -39,7 +46,8 @@ function processToken(token) {
 }
 
 module.exports = {
-  evaluate: function(message, sendText) {
+  // Returns a promise that resolves to the conversion results.
+  evaluate: function(message) {
     var tokens = message.split(' ');
     let target;
     var conversion;
@@ -49,8 +57,7 @@ module.exports = {
       // TODO: Create a hash of valid tokens to compare.
       conversion = processToken(token);
       if (!conversion) {
-        sendText(`Can't process your input: ${token}`);
-        return;
+        return Promise.reject(`Can't process your input: ${token}`);
       }
 
       target = `${BITCOINVERTER_BASE_URL}from=${conversion.fromTicker}&to=${conversion.toTicker}`;
@@ -69,44 +76,49 @@ module.exports = {
         conversion = processToken(token2);
         conversion.amount = token1;
       } else {
-        sendText(`Can't interpret ${tokens.join(' ')}`);
-        return;
+        return Promise.reject(`Can't interpret ${tokens.join(' ')}`);
       }
 
       target = `${BITCOINVERTER_BASE_URL}from=${conversion.fromTicker}&to=${conversion.toTicker}&amount=${conversion.amount}`;
       console.log(target);
-    } else {
-      sendText(`Can't interpret ${tokens.join(' ')}`);
+    } else if (tokens.length === 3) {
+      // We have all args. Check that we get an amount and two tickers in order.
+
+      // TODO: implement
       return;
+    } else {
+      return Promise.reject(`Can't interpret ${tokens.join(' ')}`);
     }
 
-    request({
-      url: target,
-      method: 'GET',
-    }, function(error, response, body) {
-      if (error) {
-        console.log('Error sending messages: ', error);
-        sendText(`Can't send message to service. Try again later or report the issue.`);
-      } else if (response.body.error) {
-        console.log('Error: ', response.body.error)
-        sendText(`Can't understand your input. Write <b>help</b> to see instructions.`);
-      } else {
-        var resp = response.body;
-        if (typeof resp !== 'object') {
-          try {
-            resp = JSON.parse(resp);
-          } catch (e) {
-            sendText(`I can't interpret the result at the time. Sorry!`);
-          }
-        }
-
-        if (!resp.price) {
-          sendText(`I can't interpret the result at the time. Sorry!`);
+    return new Promise(function(resolve, reject) {
+      request({
+        url: target,
+        method: 'GET',
+      }, function(error, response, body) {
+        if (error) {
+          console.log('Error sending messages: ', error);
+          reject(`Can't send message to service. Try again later or report the issue.`);
+        } else if (response.body.error) {
+          console.log('Error: ', response.body.error)
+          reject(`Can't understand your input. Write <b>help</b> to see instructions.`);
         } else {
-          sendText(`${conversion.amount} ${conversion.fromTicker} is ${resp.price} ${conversion.toTicker}`);
+          var resp = response.body;
+          if (typeof resp !== 'object') {
+            try {
+              resp = JSON.parse(resp);
+            } catch (e) {
+              reject(`I can't interpret the result at the time. Sorry!`);
+            }
+          }
+
+          if (!resp.price) {
+            reject(`I can't interpret the result at the time. Sorry!`);
+          } else {
+            resolve(`${conversion.amount} ${conversion.fromTicker} is ${resp.price} ${conversion.toTicker}`);
+          }
+          console.log(resp);
         }
-        console.log(resp);
-      }
-    })
+      })
+    });
   }
 }
